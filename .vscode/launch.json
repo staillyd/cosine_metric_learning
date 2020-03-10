@@ -1,0 +1,21 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Training on Market1501",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train_market1501.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset_dir=/home/staillyd/DataSets/Market1501/Market-1501-v15.09.15/",
+                "--loss_mode=cosine-softmax",
+                "--log_dir=./output/market1501/",
+                "--run_id=cosine-softmax"
+            ]
+        }
+    ]
+}

@@ -21,7 +21,7 @@ Pre-trained models used in the paper can be found
 [here](https://drive.google.com/open?id=13HtkxD6ggcrGJLWaUcqgXl2UO6-p4PK0).
 A preprint of the paper is available [here](http://elib.dlr.de/116408/).
 The repository comes with code to train a model on the
-[Market1501](http://www.liangzheng.org/Project/project_reid.html)
+[Market1501](http://www.liangzheng.com.cn/Project/project_reid.html)
 and [MARS](http://www.liangzheng.com.cn/Project/project_mars.html) datasets.
 
 ## Training on Market1501
