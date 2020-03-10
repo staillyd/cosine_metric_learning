@@ -163,3 +163,8 @@ python train_mars.py --mode=freeze --restore_path=PATH_TO_CHECKPOINT
 ```
 This will create a ``mars.pb`` file which can be supplied to Deep SORT. Again,
 the Market1501 script contains a similar function.
+
+# 个人笔记_stailld
+- [论文](paper/Deep%20Cosine%20Metric%20Learning%20for%20Person%20Re-Identification.pdf)
+- [论文笔记](note/cosine_metric_learning.md)
+- [代码笔记](note/code.md)
