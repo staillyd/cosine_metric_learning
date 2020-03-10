@@ -1,9 +1,10 @@
+forked from https://github.com/nwojke/cosine_metric_learning.git
 # cosine_metric_learning
 
 ## Introduction
 
 This repository contains code for training a metric feature representation to be
-used with the [deep_sort tracker](https://github.com/nwojke/deep_sort). The
+used with the [deep_sort tracker](https://github.com/staillyd/deep_sort). The
 approach is described in
 
     @inproceedings{Wojke2018deep,
