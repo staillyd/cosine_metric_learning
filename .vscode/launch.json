@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "CMC evaluation on validation set",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/train_market1501.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--mode=eval",
+                "--dataset_dir=/home/staillyd/DataSets/Market1501/Market-1501-v15.09.15/",
+                "--loss_mode=cosine-softmax",
+                "--log_dir=./output/market1501/",
+                "--run_id=cosine-softmax",
+                "--eval_log_dir=./eval_output/market1501"
+            ],
+            "env":{"CUDA_VISIBLE_DEVICES":""}
+        },
+        {
             "name": "Training on Market1501",
             "type": "python",
             "request": "launch",

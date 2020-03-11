@@ -69,18 +69,18 @@ def create_validation_split(data_y, num_validation_y, seed=None):
 
     """
     unique_y = np.unique(data_y)
-    if isinstance(num_validation_y, float):
-        num_validation_y = int(num_validation_y * len(unique_y))
+    if isinstance(num_validation_y, float):#从数据比例转化到数据个数
+        num_validation_y = int(num_validation_y * len(unique_y))#num_validation_y变为 比例*去重id总个数
 
     random_generator = np.random.RandomState(seed=seed)
     validation_y = random_generator.choice(
-        unique_y, num_validation_y, replace=False)
+        unique_y, num_validation_y, replace=False)#对去重ids 随机采num_validation_y个id
 
     validation_mask = np.full((len(data_y), ), False, bool)
     for y in validation_y:
-        validation_mask = np.logical_or(validation_mask, data_y == y)
-    training_mask = np.logical_not(validation_mask)
-    return np.where(training_mask)[0], np.where(validation_mask)[0]
+        validation_mask = np.logical_or(validation_mask, data_y == y)#传入比例的数据为验证集
+    training_mask = np.logical_not(validation_mask)#其余为训练集
+    return np.where(training_mask)[0], np.where(validation_mask)[0]#返回indices of training and validation set.
 
 
 def limit_num_elements_per_identity(data_y, max_num_images_per_id, seed=None):

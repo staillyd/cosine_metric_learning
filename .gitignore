@@ -102,3 +102,5 @@ ENV/
 
 # Pre-trained models
 Pre-trained models/
+
+output/

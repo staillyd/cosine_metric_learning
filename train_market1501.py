@@ -18,9 +18,9 @@ class Market1501(object):
 
     def read_train(self):
         filenames, ids, camera_indices = market1501.read_train_split_to_str(
-            self._dataset_dir)
+            self._dataset_dir)#ids:每个个体的编号，同一个人的id是一样的
         train_indices, _ = util.create_validation_split(
-            np.asarray(ids, np.int64), self._num_validation_y, self._seed)
+            np.asarray(ids, np.int64), self._num_validation_y, self._seed)#去重后的people_id按一定比例随机采样作为验证集
 
         filenames = [filenames[i] for i in train_indices]
         ids = [ids[i] for i in train_indices]
@@ -43,25 +43,25 @@ class Market1501(object):
 
 
 def main():
-    arg_parser = train_app.create_default_argument_parser("market1501")
+    arg_parser = train_app.create_default_argument_parser("market1501")#里面有add_argument
     arg_parser.add_argument(
         "--dataset_dir", help="Path to Market1501 dataset directory.",
         default="resources/Market-1501-v15.09.15")
     arg_parser.add_argument(
         "--sdk_dir", help="Path to Market1501 baseline evaluation software.",
         default="resources/Market-1501-v15.09.15-baseline")
-    args = arg_parser.parse_args()
+    args = arg_parser.parse_args()#参数设定
     dataset = Market1501(args.dataset_dir, num_validation_y=0.1, seed=1234)
 
     if args.mode == "train":
-        train_x, train_y, _ = dataset.read_train()
+        train_x, train_y, _ = dataset.read_train()#train_x:图片, train_y:people_id
         print("Train set size: %d images, %d identities" % (
             len(train_x), len(np.unique(train_y))))
 
         network_factory = net.create_network_factory(
             is_training=True, num_classes=market1501.MAX_LABEL + 1,
-            add_logits=args.loss_mode == "cosine-softmax")
-        train_kwargs = train_app.to_train_kwargs(args)
+            add_logits=args.loss_mode == "cosine-softmax")#回调函数
+        train_kwargs = train_app.to_train_kwargs(args)#从args提取出训练用的args
         train_app.train_loop(
             net.preprocess, network_factory, train_x, train_y,
             num_images_per_id=4, image_shape=market1501.IMAGE_SHAPE,
@@ -74,7 +74,7 @@ def main():
         network_factory = net.create_network_factory(
             is_training=False, num_classes=market1501.MAX_LABEL + 1,
             add_logits=args.loss_mode == "cosine-softmax")
-        eval_kwargs = train_app.to_eval_kwargs(args)
+        eval_kwargs = train_app.to_eval_kwargs(args)#从args提取出eval用的args
         train_app.eval_loop(
             net.preprocess, network_factory, valid_x, valid_y, camera_indices,
             image_shape=market1501.IMAGE_SHAPE, **eval_kwargs)

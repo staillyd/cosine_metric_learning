@@ -110,7 +110,7 @@ def create_network_factory(is_training, num_classes, add_logits,
 
     def factory_fn(image):
             with slim.arg_scope([slim.batch_norm, slim.dropout],
-                                is_training=is_training):
+                                is_training=is_training):#向第一个参数添加默认参数
                 with slim.arg_scope([slim.conv2d, slim.fully_connected,
                                      slim.batch_norm, slim.layer_norm],
                                     reuse=reuse):
@@ -126,7 +126,7 @@ def create_network_factory(is_training, num_classes, add_logits,
 def preprocess(image, is_training=False, input_is_bgr=False):
     if input_is_bgr:
         image = image[:, :, ::-1]  # BGR to RGB
-    image = tf.divide(tf.cast(image, tf.float32), 255.0)
+    image = tf.divide(tf.cast(image, tf.float32), 255.0)#归一化
     if is_training:
         image = tf.image.random_flip_left_right(image)
     return image

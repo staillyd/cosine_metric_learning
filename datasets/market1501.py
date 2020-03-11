@@ -38,7 +38,7 @@ def _parse_filename(filename):
         filename_base, ext = os.path.splitext(filename_base)
     if ext != ".jpg":
         return None
-    person_id, cam_seq, frame_idx, detection_idx = filename_base.split('_')
+    person_id, cam_seq, frame_idx, detection_idx = filename_base.split('_')#图片的命名方式
     return int(person_id), int(cam_seq[1]), filename_base, ext
 
 

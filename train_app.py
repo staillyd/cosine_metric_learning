@@ -188,7 +188,7 @@ def train_loop(preprocess_fn, network_factory, train_x, train_y,
         trainable_scopes=trainable_scopes)
 
     feed_generator = queued_trainer.random_sample_identities_forever(
-        batch_size, num_images_per_id, train_x, train_y)
+        batch_size, num_images_per_id, train_x, train_y)#生成器 yield
 
     variables_to_restore = slim.get_variables_to_restore(
         exclude=exclude_from_restore)
@@ -245,11 +245,11 @@ def create_trainer(preprocess_fn, network_factory, read_from_file, image_shape,
         if read_from_file:
             # NOTE(nwojke): tf.image.decode_jpg handles various image types.
             filename_var = tf.placeholder(tf.string, (None, ))
-            image_var = tf.map_fn(
+            image_var = tf.map_fn(#图片tensor (?,?,?,3)
                 lambda x: tf.image.decode_jpeg(
                     tf.read_file(x), channels=num_channels),
-                filename_var, back_prop=False, dtype=tf.uint8)
-            image_var = tf.image.resize_images(image_var, image_shape[:2])
+                filename_var, back_prop=False, dtype=tf.uint8)#map  back_prop是否支持反向传播
+            image_var = tf.image.resize_images(image_var, image_shape[:2])#图片tensor (?,128,64,3)
             input_vars = [filename_var, label_var]
         else:
             image_var = tf.placeholder(tf.uint8, (None,) + image_shape)
@@ -259,17 +259,17 @@ def create_trainer(preprocess_fn, network_factory, read_from_file, image_shape,
             tf.map_fn(
                 lambda x: preprocess_fn(x, is_training=True),
                 image_var, back_prop=False, dtype=tf.float32),
-            label_var]
+            label_var]#转RGB->归一化->(train)random_flip_lr
 
     trainer = queued_trainer.QueuedTrainer(enqueue_vars, input_vars)
-    image_var, label_var = trainer.get_input_vars(batch_size)
-    tf.summary.image("images", image_var)
+    image_var, label_var = trainer.get_input_vars(batch_size)#从tf队列中出batch_size个元素
+    tf.summary.image("images", image_var)#???
 
-    feature_var, logit_var = network_factory(image_var)
-    _create_loss(feature_var, logit_var, label_var, mode=loss_mode)
+    feature_var, logit_var = network_factory(image_var)#回调函数  参数在train_market1501中
+    _create_loss(feature_var, logit_var, label_var, mode=loss_mode)#损失
 
     if trainable_scopes is None:
-        variables_to_train = tf.trainable_variables()
+        variables_to_train = tf.trainable_variables()#需要训练的变量列表
     else:
         variables_to_train = []
         for scope in trainable_scopes:
@@ -277,9 +277,9 @@ def create_trainer(preprocess_fn, network_factory, read_from_file, image_shape,
                 tf.GraphKeys.TRAINABLE_VARIABLES, scope)
             variables_to_train.extend(variables)
 
-    global_step = tf.train.get_or_create_global_step()
+    global_step = tf.train.get_or_create_global_step()#训练中计数作用，每训练一个batch就加1
 
-    loss_var = tf.losses.get_total_loss()
+    loss_var = tf.losses.get_total_loss()#当有手动构造的损失函数时使用  loss_var??
     train_op = slim.learning.create_train_op(
         loss_var, tf.train.AdamOptimizer(learning_rate=learning_rate),
         global_step, summarize_gradients=False,
@@ -287,7 +287,7 @@ def create_trainer(preprocess_fn, network_factory, read_from_file, image_shape,
     tf.summary.scalar("total_loss", loss_var)
     tf.summary.scalar("learning_rate", learning_rate)
 
-    regularization_var = tf.reduce_sum(tf.losses.get_regularization_loss())
+    regularization_var = tf.reduce_sum(tf.losses.get_regularization_loss())#regularization_var??
     tf.summary.scalar("weight_loss", regularization_var)
     return trainer, train_op
 

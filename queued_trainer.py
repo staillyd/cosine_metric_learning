@@ -390,8 +390,8 @@ class QueuedTrainer(object):
                 restore_path, variables_to_restore)
             self._init_fns.append(lambda sess: sess.run(
                 init_assign_op, init_feed_dict))
-        self._feed_generator = ThreadSafeIterator(feed_generator)
-        self._coordinator = tf.train.Coordinator()
+        self._feed_generator = ThreadSafeIterator(feed_generator)#进程安全的生成器
+        self._coordinator = tf.train.Coordinator()#进程管理器
 
         if run_id is None:
             run_id = _generate_run_id(6)
