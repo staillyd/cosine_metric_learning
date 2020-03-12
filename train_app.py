@@ -263,7 +263,7 @@ def create_trainer(preprocess_fn, network_factory, read_from_file, image_shape,
 
     trainer = queued_trainer.QueuedTrainer(enqueue_vars, input_vars)
     image_var, label_var = trainer.get_input_vars(batch_size)#从tf队列中出batch_size个元素
-    tf.summary.image("images", image_var)#???
+    tf.summary.image("images", image_var)
 
     feature_var, logit_var = network_factory(image_var)#回调函数  参数在train_market1501中
     _create_loss(feature_var, logit_var, label_var, mode=loss_mode)#损失
@@ -359,30 +359,30 @@ def eval_loop(preprocess_fn, network_factory, data_x, data_y, camera_indices,
     for i in range(num_galleries):
         probe_indices, gallery_indices = util.create_cmc_probe_and_gallery(
             data_y, camera_indices, seed=random_seed + i)
-        probes.append(probe_indices)
-        galleries.append(gallery_indices)
+        probes.append(probe_indices)#列表 保存num_galleries个 存放每个人在随机相机的一张随机图索引的列表
+        galleries.append(gallery_indices)#列表 保存num_galleries个 存放每个人在另一个随机相机的一张随机图索引的列表
     probes, galleries = np.asarray(probes), np.asarray(galleries)
 
     # Set up the data feed.
-    with tf.device("/cpu:0"):
+    with tf.device("/cpu:0"): 
         # Feed probe and gallery indices to the trainer.
         num_probes, num_gallery_images = probes.shape[1], galleries.shape[1]
         probe_idx_var = tf.placeholder(tf.int64, (None, num_probes))
         gallery_idx_var = tf.placeholder(tf.int64, (None, num_gallery_images))
         trainer = queued_trainer.QueuedTrainer(
-            [probe_idx_var, gallery_idx_var])
+            [probe_idx_var, gallery_idx_var])#只有enqueue_vars，没有input_var
 
         # Retrieve indices from trainer and gather data from constant memory.
         data_x_var = tf.constant(data_x)
         data_y_var = tf.constant(data_y)
 
-        probe_idx_var, gallery_idx_var = trainer.get_input_vars(batch_size=1)
+        probe_idx_var, gallery_idx_var = trainer.get_input_vars(batch_size=1)#直接从原图像取 不像train时从randou_flip_lr后的图像取
         probe_idx_var = tf.squeeze(probe_idx_var)
         gallery_idx_var = tf.squeeze(gallery_idx_var)
 
         # Apply preprocessing.
-        probe_x_var = tf.gather(data_x_var, probe_idx_var)
-        if read_from_file:
+        probe_x_var = tf.gather(data_x_var, probe_idx_var)#按照指定的下标集合从axis=0中抽取子集，适合抽取不连续区域的子集
+        if read_from_file:#data_x是文件路径时
             # NOTE(nwojke): tf.image.decode_jpg handles various image types.
             num_channels = image_shape[-1] if len(image_shape) == 3 else 1
             probe_x_var = tf.map_fn(
@@ -391,7 +391,7 @@ def eval_loop(preprocess_fn, network_factory, data_x, data_y, camera_indices,
                 probe_x_var, dtype=tf.uint8)
             probe_x_var = tf.image.resize_images(probe_x_var, image_shape[:2])
         probe_x_var = tf.map_fn(
-            lambda x: preprocess_fn(x, is_training=False),
+            lambda x: preprocess_fn(x, is_training=False),#跟train相比，不random_flip_lr
             probe_x_var, back_prop=False, dtype=tf.float32)
         probe_y_var = tf.gather(data_y_var, probe_idx_var)
 
@@ -406,7 +406,7 @@ def eval_loop(preprocess_fn, network_factory, data_x, data_y, camera_indices,
             gallery_x_var = tf.image.resize_images(
                 gallery_x_var, image_shape[:2])
         gallery_x_var = tf.map_fn(
-            lambda x: preprocess_fn(x, is_training=False),
+            lambda x: preprocess_fn(x, is_training=False),#跟train相比，不random_flip_lr
             gallery_x_var, back_prop=False, dtype=tf.float32)
         gallery_y_var = tf.gather(data_y_var, gallery_idx_var)
 

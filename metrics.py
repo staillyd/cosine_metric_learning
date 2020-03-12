@@ -108,7 +108,7 @@ def recognition_rate_at_k(probe_x, probe_y, gallery_x, gallery_y, k,
     # j-th ranked gallery image for probe i.
     predictions = tf.exp(-measure(probe_x, gallery_x))  # Compute similarity.
     _, prediction_indices = tf.nn.top_k(predictions, k=k)
-    label_mat = tf.gather(gallery_y, prediction_indices)
+    label_mat = tf.gather(gallery_y, prediction_indices)#对应取gallery_y中索引为prediction_indices的值
 
     # Just as we have done before, build a matrix where element (i, j) is
     # one if probe i and gallery image j share the same label (same identity).

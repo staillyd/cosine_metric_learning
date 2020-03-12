@@ -12,6 +12,7 @@
   - 返回训练集的people_id
 - train_x:图片
 - train_y:people_id
+### train_loop
 - [train_app](../train_app.py).create_trainer()
   - /cpu:0
   - ![](imgs/预处理.png)
@@ -37,6 +38,32 @@
 - 获取验证集
   - 由于[train_market1501](../train_market1501.py).read_validation和read_train的随机种子一样，虽然train和eval不在同一个进程里，但得到的validation和train是刚好分割开的。
 - create_network_factory里只有is_training参数不同
+### eval_loop
+- 创建num_galleries个random CMC galleries to average CMC top-k over
+  - for i in range(num_galleries):
+    - [util](../datasets/util.py).create_cmc_probe_and_gallery()
+      - 随机种子固定
+      - for y in unique_y:#对每个不同的人
+        - idx_1:从随机选取的一个摄像头拍摄的id为当前y的人的图像索引中随机选取一个
+        - idx_2:从随机选取的一个摄像头拍摄的id为当前y的人的图像索引中随机选取一个
+        - probe_indices.append(i1)#列表保存 每个人在随机相机的一张随机图索引
+        - gallery_indices.append(i2)#列表保存 每个人在另一个随机相机的一张随机图索引
+      - 返回probe_indices,gallery_indices
+    - probes.append(probe_indices)#列表 **保存num_galleries个 存放每个人在随机相机的一张随机图索引的列表**
+    - galleries.append(gallery_indices)#列表 **保存num_galleries个 存放每个人在另一个随机相机的一张随机图索引的列表**
+- [train_app](../train_app.py).eval_loop()
+  - ![](imgs/预处理_eval.png)
+  - CMC
+    - ![](imgs/CMC输入.png)
+  - evaluate
+- CMC曲线
+  - [metrics](../metrics.py).recognition_rate_at_k()
+    - label_mat:probs_x中与gallery_x最相近的k个gallery_y值是否与prob_y相等
+    - 返回 num_correct/min(k,num_relevant)
+      - num_correct:the fraction of images in the top k entries of the ranked gallery that have the same label as the probe 
+      - num_relevant:the total number of elements in the gallery that have the same label.代码中这里一直是1
+  - top1识别率表示按照某种相似度匹配规则匹配后，第一次就能判断出正确的标签的数目与总的测试样本数目之比
+  - top5识别率指前五项（按照匹配程度从大到小排列后）有正确匹配的个数与总的测试样本数目之比。
 
 
 # code tips
@@ -46,6 +73,24 @@
 - 多进程且进程安全地train
   - [queued_trainer](../queued_trainer.py).run()
   - [ ] 生成器生成训练样本
+  - [ ] session
+  - _run_enqueue_thread()
+    - ```
+        feed_dict = {
+          var: value for var, value in
+            zip(self._input_vars, data)}
+        session.run(self._enqueue_op, feed_dict=feed_dict)
+      ```
+    - ```
+      self._enqueue_op = self._queue.enqueue_many(self._enqueue_vars)
+      ```
+    - [train_app](../train_app.py)
+      - 训练时enqueue_var为[random_flip_lr后的图像,label_var]
+        - trainer = queued_trainer.QueuedTrainer(enqueue_vars, input_vars)
+          - 这里的enqueue_vars是[对input_vars转RGB->归一化->random_flip_lr后的值,label_var]
+      - eval时enqueue_var为[原图像,label_var]
+        - trainer = queued_trainer.QueuedTrainer([probe_idx_var, gallery_idx_var])
+          - 只有enqueue_vars，没有input_var
 - vscode lanch.json单个进程的环境变量修改
   - command
     - ```

@@ -145,8 +145,8 @@ def create_cmc_probe_and_gallery(data_y, camera_indices=None, seed=None):
     random_generator = np.random.RandomState(seed=seed)
     unique_y = np.unique(data_y)
     probe_indices, gallery_indices = [], []
-    for y in unique_y:
-        mask_y = data_y == y
+    for y in unique_y:#对每个不同的人
+        mask_y = data_y == y#所有验证集中id为当前y的人对应的图像
 
         unique_cameras = np.unique(camera_indices[mask_y])
         if len(unique_cameras) == 1:
@@ -159,11 +159,11 @@ def create_cmc_probe_and_gallery(data_y, camera_indices=None, seed=None):
         else:
             # If we have multiple cameras, take images of two (randomly chosen)
             # different devices.
-            c1, c2 = random_generator.choice(unique_cameras, 2, replace=False)
-            indices1 = np.where(np.logical_and(mask_y, camera_indices == c1))[0]
+            c1, c2 = random_generator.choice(unique_cameras, 2, replace=False)#从所有摄像头里随机选两个摄像头
+            indices1 = np.where(np.logical_and(mask_y, camera_indices == c1))[0]#随机选取的其中一个摄像头拍摄的id为当前y的人的图像索引
             indices2 = np.where(np.logical_and(mask_y, camera_indices == c2))[0]
             i1 = random_generator.choice(indices1)
-            i2 = random_generator.choice(indices2)
+            i2 = random_generator.choice(indices2)#从选取的一个摄像头拍摄的id为当前y的人的图像索引中随机选取一个
 
         probe_indices.append(i1)
         gallery_indices.append(i2)
