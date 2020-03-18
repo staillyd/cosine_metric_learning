@@ -16,6 +16,7 @@
 - [train_app](../train_app.py).create_trainer()
   - /cpu:0
   - ![](imgs/预处理.png)
+    - image_var从filename读取图片并resize
   - image_var流向CNN网络
   - label_var、feature、logits流向loss
 
